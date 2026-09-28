@@ -3,3 +3,4 @@ uvicorn[standard]
 yt-dlp
 curl-cffi
 python-multipart
+imageio-ffmpeg
