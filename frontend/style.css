@@ -1,0 +1,309 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 90%;
+    max-width: 700px;
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #2563eb;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+#result {
+    margin-top: 30px;
+}
+
+#result img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.download-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 12px 20px;
+    background: #16a34a;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.download-settings {
+    margin-top: 25px;
+    text-align: left;
+}
+
+.download-settings label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+.download-settings select,
+.download-settings input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+.status {
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+.error {
+    color: #dc2626;
+}
+
+/* ==========================================
+   DOWNLOAD SETTINGS
+========================================== */
+
+.download-settings {
+    margin-top: 25px;
+    text-align: left;
+}
+
+
+.download-settings label {
+    display: block;
+
+    margin-top: 15px;
+    margin-bottom: 6px;
+
+    font-weight: bold;
+}
+
+
+.download-settings select,
+.download-settings input {
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    font-size: 15px;
+}
+
+
+/* ==========================================
+   PROGRESS CONTAINER
+========================================== */
+
+.progress-container {
+
+    width: 100%;
+
+    height: 30px;
+
+    background: #e5e7eb;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    margin-top: 20px;
+
+    display: none;
+}
+
+
+/* ==========================================
+   PROGRESS BAR
+========================================== */
+
+.progress-bar {
+
+    width: 0%;
+
+    height: 100%;
+
+    background: #2563eb;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: bold;
+
+    font-size: 14px;
+
+    transition: width 0.3s ease;
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+.download-status {
+
+    margin-top: 15px;
+
+    font-weight: bold;
+
+    text-align: center;
+}
+
+
+.download-details {
+
+    margin-top: 8px;
+
+    text-align: center;
+
+    color: #666;
+
+    font-size: 14px;
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+.error {
+
+    color: #dc2626;
+
+    font-weight: bold;
+}
+
+
+/* ==========================================
+   DISABLED BUTTON
+========================================== */
+
+button:disabled {
+
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+.progress-container {
+    width: 100%;
+    height: 30px;
+
+    background: #e5e7eb;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    margin-top: 20px;
+
+    display: none;
+}
+
+
+.progress-bar {
+    width: 0%;
+
+    height: 100%;
+
+    background: #2563eb;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: bold;
+
+    transition: width 0.3s ease;
+}
+
+
+.download-status {
+    margin-top: 15px;
+
+    text-align: center;
+
+    font-weight: bold;
+}
+
+
+.download-details {
+    margin-top: 8px;
+
+    text-align: center;
+
+    color: #666;
+
+    font-size: 14px;
+}
+
+/*
+ {
+  "url": "YOUR_VIDEO_URL"
+}
+
+python -m unicorn main:app --reload
+
+  */
