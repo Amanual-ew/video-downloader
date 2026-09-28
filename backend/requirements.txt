@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
 yt-dlp
+imageio-ffmpeg
 curl-cffi
 python-multipart
-imageio-ffmpeg

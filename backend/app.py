@@ -27,6 +27,30 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 
 
 # ==========================================
+# COOKIES (works locally and on Render)
+# ==========================================
+
+# On Render: set a Secret File mounted at /etc/secrets/cookies.txt
+# Locally: put cookies.txt in the backend folder (optional)
+
+COOKIE_CANDIDATES = [
+    "/etc/secrets/cookies.txt",                      # Render secret file
+    str(Path(__file__).resolve().parent / "cookies.txt"),  # local backend/cookies.txt
+]
+
+COOKIE_FILE = None
+for candidate in COOKIE_CANDIDATES:
+    if os.path.exists(candidate):
+        COOKIE_FILE = candidate
+        break
+
+if COOKIE_FILE:
+    print(f"[cookies] using {COOKIE_FILE}")
+else:
+    print("[cookies] no cookies file found — some sites may fail")
+
+
+# ==========================================
 # CORS
 # ==========================================
 
@@ -82,24 +106,34 @@ def clean_filename(filename):
     if filename.lower().endswith(".mp4"):
         filename = filename[:-4]
 
-    filename = re.sub(
-        r'[<>:"/\\|?*]',
-        "",
-        filename
-    )
-
-    filename = re.sub(
-        r'[\x00-\x1f]',
-        "",
-        filename
-    )
-
+    filename = re.sub(r'[<>:"/\\|?*]', "", filename)
+    filename = re.sub(r'[\x00-\x1f]', "", filename)
     filename = filename.strip(" .")
 
     if not filename:
         filename = "social_video"
 
     return filename[:100]
+
+
+# ==========================================
+# SHARED YT-DLP BASE OPTIONS
+# ==========================================
+
+def base_ydl_opts(quiet=True):
+    opts = {
+        "quiet": quiet,
+        "no_warnings": quiet,
+        "noplaylist": True,
+        # Make requests look like a real Chrome browser.
+        # This is the main fix for TikTok/Instagram on Render.
+        "impersonate": "chrome",
+        # Don't let yt-dlp try to write into read-only places
+        "cachedir": False,
+    }
+    if COOKIE_FILE:
+        opts["cookiefile"] = COOKIE_FILE
+    return opts
 
 
 # ==========================================
@@ -114,8 +148,19 @@ def home():
     if index_file.exists():
         return FileResponse(str(index_file))
 
+    return {"message": "Social Video Downloader API is running"}
+
+
+# ==========================================
+# HEALTH (useful for Render)
+# ==========================================
+
+@app.get("/health")
+def health():
     return {
-        "message": "Social Video Downloader API is running"
+        "ok": True,
+        "cookies": bool(COOKIE_FILE),
+        "ffmpeg": imageio_ffmpeg.get_ffmpeg_exe(),
     }
 
 
@@ -128,31 +173,18 @@ def video_info(request: VideoRequest):
 
     try:
 
-        ydl_opts = {
-            "quiet": True,
-            "no_warnings": True,
-        }
+        ydl_opts = base_ydl_opts(quiet=True)
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-
-            info = ydl.extract_info(
-                request.url,
-                download=False
-            )
+            info = ydl.extract_info(request.url, download=False)
 
         qualities = set()
-
         for fmt in info.get("formats", []):
-
             height = fmt.get("height")
-
             if height:
                 qualities.add(height)
 
-        qualities = sorted(
-            qualities,
-            reverse=True
-        )
+        qualities = sorted(qualities, reverse=True)
 
         return {
             "success": True,
@@ -160,14 +192,16 @@ def video_info(request: VideoRequest):
             "thumbnail": info.get("thumbnail"),
             "duration": info.get("duration"),
             "url": request.url,
-            "qualities": qualities
+            "qualities": qualities,
         }
 
     except Exception as e:
 
+        print("[video-info] error:", str(e))
+
         return {
             "success": False,
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -179,21 +213,15 @@ def video_info(request: VideoRequest):
 def start_download(request: VideoRequest):
 
     download_id = uuid.uuid4().hex
-
     filename = clean_filename(request.filename)
 
     job_folder = os.path.join(
         tempfile.gettempdir(),
         f"social_downloader_{download_id}"
     )
-
-    os.makedirs(
-        job_folder,
-        exist_ok=True
-    )
+    os.makedirs(job_folder, exist_ok=True)
 
     downloads[download_id] = {
-
         "status": "starting",
         "progress": 0,
         "speed": "0 B/s",
@@ -201,74 +229,45 @@ def start_download(request: VideoRequest):
         "filename": f"{filename}.mp4",
         "folder": job_folder,
         "path": None,
-        "error": None
+        "error": None,
     }
 
     thread = threading.Thread(
         target=download_video,
-        args=(
-            download_id,
-            request.url,
-            request.quality,
-            filename,
-            job_folder
-        )
+        args=(download_id, request.url, request.quality, filename, job_folder)
     )
-
     thread.daemon = True
     thread.start()
 
-    print("")
-    print("==============================")
-    print("DOWNLOAD JOB STARTED")
-    print("==============================")
-    print("ID:", download_id)
-    print("Filename:", filename)
-    print("Quality:", request.quality)
+    print("=" * 30)
+    print("DOWNLOAD JOB STARTED:", download_id)
+    print("Filename:", filename, "| Quality:", request.quality)
 
-    return {
-        "success": True,
-        "download_id": download_id
-    }
+    return {"success": True, "download_id": download_id}
 
 
 # ==========================================
 # DOWNLOAD VIDEO
 # ==========================================
 
-def download_video(
-    download_id,
-    url,
-    quality,
-    filename,
-    job_folder
-):
+def download_video(download_id, url, quality, filename, job_folder):
 
     try:
 
         ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
 
-        output_template = os.path.join(
-            job_folder,
-            "video.%(ext)s"
-        )
+        output_template = os.path.join(job_folder, "video.%(ext)s")
 
         if quality == "best":
-
             video_format = (
                 "bv*[ext=mp4]+ba[ext=m4a]/"
                 "b[ext=mp4]/"
                 "b"
             )
-
         else:
-
             video_format = (
-                f"bv*[height<={quality}]"
-                "[ext=mp4]+"
-                "ba[ext=m4a]/"
-                f"b[height<={quality}]"
-                "[ext=mp4]/"
+                f"bv*[height<={quality}][ext=mp4]+ba[ext=m4a]/"
+                f"b[height<={quality}][ext=mp4]/"
                 "b"
             )
 
@@ -278,143 +277,76 @@ def download_video(
 
             if status == "downloading":
 
-                downloaded = data.get(
-                    "downloaded_bytes",
-                    0
-                )
-
-                total = (
-                    data.get("total_bytes")
-                    or
-                    data.get("total_bytes_estimate")
-                )
+                downloaded = data.get("downloaded_bytes", 0)
+                total = data.get("total_bytes") or data.get("total_bytes_estimate")
 
                 if total and total > 0:
-
-                    percent = round(
-                        (downloaded / total) * 100,
-                        1
-                    )
-
+                    percent = round((downloaded / total) * 100, 1)
                 else:
-
                     percent = 0
 
-                speed = data.get(
-                    "_speed_str",
-                    "Calculating..."
-                )
-
-                eta = data.get("eta")
-
                 downloads[download_id].update({
-
                     "status": "downloading",
                     "progress": percent,
-                    "speed": speed,
-                    "eta": eta
+                    "speed": data.get("_speed_str", "Calculating..."),
+                    "eta": data.get("eta"),
                 })
 
             elif status == "finished":
 
                 downloads[download_id].update({
-
                     "status": "processing",
                     "progress": 99,
                     "speed": "",
-                    "eta": None
+                    "eta": None,
                 })
+                print("Download finished, processing...")
 
-                print(
-                    "Video downloaded. "
-                    "Now processing..."
-                )
-
-        ydl_opts = {
-
-            "quiet": False,
-            "no_warnings": False,
+        ydl_opts = base_ydl_opts(quiet=False)
+        ydl_opts.update({
             "format": video_format,
             "merge_output_format": "mp4",
             "outtmpl": output_template,
             "ffmpeg_location": ffmpeg_path,
-            "progress_hooks": [
-                progress_hook
-            ]
-        }
+            "progress_hooks": [progress_hook],
+        })
 
         downloads[download_id]["status"] = "downloading"
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-
             ydl.download([url])
 
         files = os.listdir(job_folder)
+        print("Files created:", files)
 
-        print("")
-        print("==============================")
-        print("FILES CREATED BY YT-DLP")
-        print("==============================")
-
-        for file in files:
-            print(file)
-
-        mp4_files = [
-            file
-            for file in files
-            if file.lower().endswith(".mp4")
-        ]
+        mp4_files = [f for f in files if f.lower().endswith(".mp4")]
 
         if not mp4_files:
+            raise Exception("yt-dlp finished but no MP4 file was found.")
 
-            raise Exception(
-                "yt-dlp finished but no MP4 file was found."
-            )
+        actual_file = os.path.join(job_folder, mp4_files[0])
+        final_path = os.path.join(job_folder, f"{filename}.mp4")
 
-        actual_file = os.path.join(
-            job_folder,
-            mp4_files[0]
-        )
-
-        final_path = os.path.join(
-            job_folder,
-            f"{filename}.mp4"
-        )
-
-        os.replace(
-            actual_file,
-            final_path
-        )
+        os.replace(actual_file, final_path)
 
         downloads[download_id].update({
-
             "status": "completed",
             "progress": 100,
             "path": final_path,
             "filename": f"{filename}.mp4",
             "speed": "",
-            "eta": None
+            "eta": None,
         })
 
-        print("")
-        print("==============================")
-        print("DOWNLOAD SUCCESSFUL")
-        print("==============================")
-        print("Final file:")
-        print(final_path)
+        print("DOWNLOAD SUCCESSFUL:", final_path)
 
     except Exception as e:
 
-        print("")
-        print("==============================")
-        print("DOWNLOAD ERROR")
-        print("==============================")
-        print(str(e))
+        print("DOWNLOAD ERROR:", str(e))
 
         downloads[download_id].update({
-
             "status": "error",
-            "error": str(e)
+            "error": str(e),
         })
 
 
@@ -426,11 +358,7 @@ def download_video(
 def download_progress(download_id: str):
 
     if download_id not in downloads:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Download not found"
-        )
+        raise HTTPException(status_code=404, detail="Download not found")
 
     return downloads[download_id]
 
@@ -443,41 +371,22 @@ def download_progress(download_id: str):
 def download_file(download_id: str):
 
     if download_id not in downloads:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Download not found"
-        )
+        raise HTTPException(status_code=404, detail="Download not found")
 
     download = downloads[download_id]
 
     if download["status"] != "completed":
-
-        raise HTTPException(
-            status_code=400,
-            detail="Download is not completed yet"
-        )
+        raise HTTPException(status_code=400, detail="Download is not completed yet")
 
     path = download["path"]
 
-    if not path:
-
-        raise HTTPException(
-            status_code=404,
-            detail="File path is missing"
-        )
-
-    if not os.path.exists(path):
-
-        raise HTTPException(
-            status_code=404,
-            detail="Video file does not exist"
-        )
+    if not path or not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="Video file does not exist")
 
     print("Sending file:", path)
 
     return FileResponse(
         path=path,
         media_type="video/mp4",
-        filename=download["filename"]
+        filename=download["filename"],
     )
