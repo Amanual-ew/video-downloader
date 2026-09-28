@@ -196,12 +196,14 @@ def video_info(request: VideoRequest):
         }
 
     except Exception as e:
+        import traceback
 
-        print("[video-info] error:", str(e))
+        print("[video-info] ERROR:", repr(e))
+        traceback.print_exc()
 
         return {
             "success": False,
-            "error": str(e),
+            "error": repr(e)
         }
 
 
