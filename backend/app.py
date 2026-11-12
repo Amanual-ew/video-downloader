@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -228,9 +228,21 @@ def home():
 
     if index_file.exists():
 
-        return FileResponse(
-            str(index_file)
+        html = index_file.read_text(
+            encoding="utf-8"
         )
+
+        app_url = os.environ.get(
+            "RENDER_EXTERNAL_URL",
+            "http://127.0.0.1:8000"
+        ).rstrip("/")
+
+        html = html.replace(
+            "https://your-render-app.onrender.com",
+            app_url
+        )
+
+        return HTMLResponse(content=html)
 
     return {
         "message":

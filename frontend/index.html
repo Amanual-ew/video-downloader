@@ -56,16 +56,6 @@
     </main>
 
     <script src="static/js/script.js"></script>
-    <script>
-        const currentOrigin = window.location.origin;
-        const metaUrl = document.querySelector('meta[property="og:url"]');
-        const twitterUrl = document.querySelector('meta[name="twitter:url"]');
-        const canonical = document.querySelector('link[rel="canonical"]');
-
-        if (metaUrl) metaUrl.setAttribute('content', currentOrigin);
-        if (twitterUrl) twitterUrl.setAttribute('content', currentOrigin);
-        if (canonical) canonical.setAttribute('href', currentOrigin);
-    </script>
 
 </body>
 </html>
