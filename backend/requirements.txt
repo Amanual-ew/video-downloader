@@ -4,3 +4,4 @@ yt-dlp
 imageio-ffmpeg
 curl-cffi
 python-multipart
+bgutil-ytdlp-pot-provider

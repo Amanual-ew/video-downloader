@@ -1,0 +1,7 @@
+README.md
+pyproject.toml
+social_video_downloader.egg-info/PKG-INFO
+social_video_downloader.egg-info/SOURCES.txt
+social_video_downloader.egg-info/dependency_links.txt
+social_video_downloader.egg-info/requires.txt
+social_video_downloader.egg-info/top_level.txt

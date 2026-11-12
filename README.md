@@ -1,255 +1,199 @@
 # Social Video Downloader
 
-A web-based video downloader built with **FastAPI** and **yt-dlp**.
-The application allows users to enter a supported social-media video URL, choose a video quality, download the video, and receive the downloaded file.
+A lightweight web app for downloading social media videos from supported public URLs. The project combines a FastAPI backend, a small browser UI, and `yt-dlp` to fetch and convert media into downloadable files.
+
+## Overview
+
+This downloader lets users:
+
+- paste a supported social video URL
+- inspect available video qualities
+- choose a preferred quality
+- trigger a server-side download job
+- receive the final MP4 file in the browser
 
 ## Features
 
-* 🎥 Download online videos
-* 📱 Support for multiple platforms through `yt-dlp`
-* 🎚️ Video quality selection
-* 📊 Download progress percentage
-* ⏳ Download status messages
-* 📁 Temporary server-side file handling
-* ⚡ FastAPI backend
-* 🔄 Automatic video/audio merging with FFmpeg when required
-* 🖥️ Simple web interface
+- 🎥 Download video content from supported sites via `yt-dlp`
+- 📱 Browser-based frontend with a simple HTML/CSS/JavaScript UI
+- ⚡ FastAPI backend for reliable API handling
+- 🎚️ Quality selection support based on available formats
+- 📊 Download progress and job status tracking
+- 📁 Temporary file handling per download session
+- 🔄 FFmpeg-based media processing when required
+- 🧩 Ready for local development and Docker-based deployment
 
-## Technologies Used
+## Tech Stack
 
 ### Backend
 
-* Python
-* FastAPI
-* Uvicorn
-* yt-dlp
-* curl-cffi
-
-### Media Processing
-
-* FFmpeg
+- Python 3.10+
+- FastAPI
+- Uvicorn
+- yt-dlp
+- curl-cffi
+- imageio-ffmpeg
 
 ### Frontend
 
-* HTML
-* CSS
-* JavaScript
+- HTML
+- CSS
+- JavaScript
+
+### Media processing
+
+- FFmpeg
 
 ## Project Structure
 
 ```text
 social-video-downloader/
-│
 ├── backend/
 │   ├── app.py
+│   ├── main.py
 │   ├── requirements.txt
 │   └── ...
-│
 ├── frontend/
-│   └── ...
-│
+│   ├── index.html
+│   ├── css/
+│   └── js/
+├── .gitignore
+├── .dockerignore
+├── Dockerfile
+├── pyproject.toml
 ├── README.md
-└── ...
+└── .venv/   # local environment, not committed
 ```
 
-> The exact structure may be different depending on your current project files.
+## Project Metadata
+
+The repository now includes a proper Python project definition in [pyproject.toml](pyproject.toml). It declares:
+
+- project name and version
+- description and keywords
+- supported Python versions
+- runtime dependencies
+- build metadata for packaging and tooling
 
 ## Requirements
 
-Before running the project, make sure you have:
+Before running the app, make sure the following are installed:
 
-* Python 3.10+
-* FFmpeg
-* Git
-* Internet connection
+- Python 3.10 or newer
+- FFmpeg
+- Git
+- Internet access for download requests
 
-## Installation
+## Quick Start
 
 ### 1. Clone the repository
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone <your-repository-url>
 cd social-video-downloader
 ```
 
 ### 2. Create a virtual environment
 
-Windows:
+```bash
+python -m venv .venv
+```
+
+On Windows PowerShell:
 
 ```powershell
-python -m venv venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-Activate it:
+### 3. Install dependencies
 
-```powershell
-venv\Scripts\activate
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements.txt
 ```
 
-### 3. Install Python dependencies
+You can also install the project metadata package in editable mode:
 
-```powershell
-pip install -r backend/requirements.txt
+```bash
+python -m pip install -e .
 ```
 
-## Running the Backend
+### 4. Run the API server
 
-Go to the backend directory:
+From the project root:
 
-```powershell
-cd backend
+```bash
+uvicorn backend.app:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Start the FastAPI server:
+The app should be available at:
 
-```powershell
-python -m uvicorn app:app --reload
+- API: http://127.0.0.1:8000
+- Docs: http://127.0.0.1:8000/docs
+
+## Docker
+
+A Dockerfile is included for containerized deployment.
+
+```bash
+docker build -t social-video-downloader .
+docker run --rm -p 8000:8000 -e PORT=8000 social-video-downloader
 ```
 
-The API will normally be available at:
+## Environment Notes
 
-```text
-http://127.0.0.1:8000
-```
-
-FastAPI documentation is available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-## Testing yt-dlp
-
-You can test `yt-dlp` directly from the terminal:
-
-```powershell
-python -m yt_dlp "VIDEO_URL"
-```
-
-For example:
-
-```powershell
-python -m yt_dlp "https://www.tiktok.com/@username/video/VIDEO_ID"
-```
-
-If your system requires browser impersonation:
-
-```powershell
-python -m yt_dlp --impersonate chrome "VIDEO_URL"
-```
-
-## Environment Variables
-
-If the project requires environment variables, create a `.env` file locally.
-
-Example:
-
-```env
-PORT=8000
-```
-
-Do **not** upload passwords, API keys, cookies, or other secrets to GitHub.
-
-Add `.env` to `.gitignore`:
-
-```text
-.env
-venv/
-__pycache__/
-*.pyc
-downloads/
-```
+If you need local secrets or browser cookies, keep them in a local `.env` file or a secure machine-specific location. Do not commit sensitive data to source control.
 
 ## Supported Platforms
 
-Platform support depends on the current capabilities of `yt-dlp`. Supported websites can change over time.
+Support depends on the upstream capabilities of `yt-dlp` and the hosting site. Some platforms may require updated extractor support or browser impersonation.
 
-You can check the current extractor list with:
+You can inspect extractor availability with:
 
-```powershell
+```bash
 python -m yt_dlp --list-extractors
 ```
 
-Some websites may require additional configuration or may temporarily stop working when the website changes its systems.
+## Testing the downloader
 
-## Deployment
-
-The application can be deployed to a cloud platform that supports Python/FastAPI applications.
-
-For production, the application should be started with:
+You can validate a URL directly with `yt-dlp` before using the app:
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port $PORT
+python -m yt_dlp "https://example.com/video-url"
 ```
 
-FFmpeg must also be available on the deployment server if the application needs to merge video and audio streams.
+For browser impersonation cases:
 
-## Important Notes
+```bash
+python -m yt_dlp --impersonate chrome "https://example.com/video-url"
+```
 
-This project is intended for downloading content that you have permission to download.
+## Important Usage Note
 
-Users are responsible for following the terms of service and copyright laws applicable to the content and websites they use.
-
-The availability of a website through `yt-dlp` does not guarantee that every video will always be downloadable.
+This project is intended to download content only when you have permission to do so. Users are responsible for following platform terms of service, copyright laws, and local regulations.
 
 ## Troubleshooting
 
-### `yt-dlp` is not recognized
+### `yt-dlp` is not found
 
 Use:
 
-```powershell
+```bash
 python -m yt_dlp --version
 ```
 
-instead of:
+rather than relying on a global `yt-dlp` binary.
 
-```powershell
-yt-dlp --version
-```
-
-Install or update it with:
-
-```powershell
-python -m pip install -U yt-dlp
-```
-
-### TikTok download fails
-
-First update the dependencies:
-
-```powershell
-python -m pip install -U yt-dlp
-python -m pip install -U curl-cffi
-```
-
-Then test:
-
-```powershell
-python -m yt_dlp --impersonate chrome "TIKTOK_URL"
-```
-
-### FFmpeg error
-
-Make sure FFmpeg is installed and available in your system PATH.
+### FFmpeg is missing
 
 Check it with:
 
-```powershell
+```bash
 ffmpeg -version
 ```
 
-## Future Improvements
-
-* User download history
-* Better error messages
-* More platform support
-* Download cancellation
-* Improved mobile interface
-* Background download jobs
-* Cloud storage integration
-* Production deployment
+If it is not installed, install FFmpeg and ensure it is available in your system PATH.
 
 ## License
 
-This project is for educational and personal development purposes.
+This project currently has no explicit repository license. If you plan to publish or distribute it publicly, add a license file and update the project metadata accordingly.

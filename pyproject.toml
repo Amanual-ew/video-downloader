@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "social-video-downloader"
+version = "0.1.0"
+description = "A FastAPI-based web app for downloading social media videos with yt-dlp."
+readme = "README.md"
+requires-python = ">=3.10"
+keywords = ["social-media", "downloader", "fastapi", "yt-dlp", "video"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Framework :: FastAPI",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "yt-dlp",
+  "imageio-ffmpeg",
+  "curl-cffi",
+  "python-multipart",
+  "bgutil-ytdlp-pot-provider",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-user/social-video-downloader"
+Repository = "https://github.com/your-user/social-video-downloader"
+Issues = "https://github.com/your-user/social-video-downloader/issues"
+
+[tool.setuptools]
+include-package-data = true
+packages = []

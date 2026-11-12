@@ -3,9 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="Social Video Downloader">
+    <meta name="description" content="Download videos from supported social platforms in a simple, secure, and fast web app.">
+    <meta name="application-name" content="Social Video Downloader">
+    <meta name="author" content="Amanual Ewunetu">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Social Video Downloader">
+    <meta property="og:title" content="Social Video Downloader">
+    <meta property="og:description" content="Download videos from supported social platforms in a simple, secure, and fast web app.">
+    <meta property="og:url" content="https://your-render-app.onrender.com">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:image:alt" content="Video downloader app preview">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Social Video Downloader">
+    <meta name="twitter:description" content="Download videos from supported social platforms in a simple, secure, and fast web app.">
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80">
+    <meta name="twitter:url" content="https://your-render-app.onrender.com">
 
     <title>Social Video Downloader</title>
-
+    <link rel="canonical" href="https://your-render-app.onrender.com">
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
@@ -36,6 +56,16 @@
     </main>
 
     <script src="static/js/script.js"></script>
+    <script>
+        const currentOrigin = window.location.origin;
+        const metaUrl = document.querySelector('meta[property="og:url"]');
+        const twitterUrl = document.querySelector('meta[name="twitter:url"]');
+        const canonical = document.querySelector('link[rel="canonical"]');
+
+        if (metaUrl) metaUrl.setAttribute('content', currentOrigin);
+        if (twitterUrl) twitterUrl.setAttribute('content', currentOrigin);
+        if (canonical) canonical.setAttribute('href', currentOrigin);
+    </script>
 
 </body>
 </html>
