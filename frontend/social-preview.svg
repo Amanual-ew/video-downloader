@@ -1,0 +1,25 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="60" x2="1100" y2="570" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="240" y1="140" x2="980" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" rx="28" fill="url(#bg)"/>
+  <circle cx="1040" cy="118" r="220" fill="#1F2937" opacity="0.7"/>
+  <circle cx="171" cy="520" r="190" fill="#111827" opacity="0.9"/>
+
+  <rect x="110" y="126" width="170" height="170" rx="38" fill="url(#accent)"/>
+  <path d="M176 178.5C176 172.701 182.095 168.5 189.5 168.5C193.109 168.5 196.434 169.661 199.14 171.666L244.54 202.166C247.992 204.7 250 208.5 250 212.5C250 216.5 247.992 220.3 244.54 222.834L199.14 253.334C196.434 255.339 193.109 256.5 189.5 256.5C182.095 256.5 176 252.299 176 246.5V178.5Z" fill="#F8FAFC"/>
+
+  <text x="110" y="392" fill="#F8FAFC" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="700">Social Video</text>
+  <text x="110" y="470" fill="#A78BFA" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="700">Downloader</text>
+
+  <rect x="110" y="515" width="190" height="10" rx="5" fill="#22C55E" opacity="0.95"/>
+  <text x="110" y="565" fill="#CBD5E1" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="500">Download videos from supported social platforms</text>
+</svg>
